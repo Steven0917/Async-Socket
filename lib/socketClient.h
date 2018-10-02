@@ -1,11 +1,12 @@
 #ifndef DEF_SOCKETCLIENT
 #define DEF_SOCKETCLIENT
 
+#include <winsock2.h>
+
 #include <string>
-#include <pthread.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+//#include <unistd.h>
+//#include <sys/socket.h>
+//#include <arpa/inet.h>
 #include <map>
 
 #include "base64.h"
@@ -25,7 +26,7 @@ class SocketClient {
 
         int mPacketSize;
 
-        pthread_t mThread;
+        //pthread_t mThread;
         std::map<std::string, void (*)(SocketClient*, std::vector<std::string>)> mMessageListenerMap;
         void (*mDisconnectListener) (SocketClient*);
 
@@ -53,7 +54,7 @@ class SocketClient {
         bool send(std::string key, std::string message);
         void addListener(std::string key, void (*messageListener) (SocketClient*, std::vector<std::string>));
         void setDisconnectListener(void (*disconnectListener) (SocketClient*));
-        void setTag(void *tag, DataInterface interface);
+        void setTag(void *tag, DataInterface data_if);
 };
 
 #endif

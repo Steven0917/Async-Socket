@@ -1,3 +1,6 @@
 obj/
 /client
 /server
+.vs/
+Debug/
+Release/

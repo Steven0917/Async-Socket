@@ -9,6 +9,8 @@ SocketServer::SocketServer(int port){
 }
 
 bool SocketServer::start(){
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2, 2), &wsa);
     mSocket = ::socket(AF_INET , SOCK_STREAM , 0);
     if(mSocket!=-1){
         if(::bind(mSocket,(struct sockaddr *)&mServer , sizeof(mServer)) >= 0){
@@ -23,7 +25,7 @@ int SocketServer::accept(){
     int c = sizeof(struct sockaddr_in);
     struct sockaddr_in client;
 
-	int client_sock = ::accept(mSocket, (struct sockaddr *)&client, (socklen_t*)&c);
+	int client_sock = ::accept(mSocket, (struct sockaddr *)&client, &c);
 	if (client_sock < 0){
         return -1;
 	}

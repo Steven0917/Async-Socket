@@ -3,7 +3,8 @@
 
 #include <functional>
 
-struct DataInterface {
+class DataInterface {
+public:
     std::function<void(void*)> mDestroy;
 
     DataInterface(){}

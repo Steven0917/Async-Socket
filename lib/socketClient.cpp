@@ -1,4 +1,7 @@
 #include "socketClient.h"
+#include <thread>
+
+#pragma comment(lib, "Ws2_32.lib")
 
 SocketClient::SocketClient(){}
 
@@ -24,7 +27,8 @@ SocketClient::SocketClient(int socket){
     mConnected = true;
     mThreadStopped = false;
     mPacketSize = 4096;
-    pthread_create(&mThread, NULL, &staticReceiveThread, this);
+    std::thread(staticReceiveThread, this);
+    //pthread_create(&mThread, NULL, &staticReceiveThread, this);
 }
 
 SocketClient::~SocketClient(){
@@ -38,6 +42,8 @@ int SocketClient::getSocket(){
 }
 
 bool SocketClient::connect(){
+    WSADATA wsa;
+    WSAStartup(MAKEWORD(2, 2), &wsa);
     mSocket = socket(AF_INET , SOCK_STREAM , 0);
     if(mSocket == -1)
     {
@@ -50,19 +56,20 @@ bool SocketClient::connect(){
     }
 
     mConnected = true;
-    pthread_create(&mThread, NULL, &staticReceiveThread, this);
+    std::thread(staticReceiveThread, this);
+    //pthread_create(&mThread, NULL, &staticReceiveThread, this);
 
     return true;
 }
 
 void SocketClient::disconnect(){
-    close(mSocket);
+    closesocket(mSocket);
     mConnected = false;
     mThreadStopped = true;
 }
 
 bool SocketClient::send(std::string message){
-    uint32_t length = htonl(message.size());
+    char length = htonl(message.size());
     if(::send(mSocket, &length, sizeof(uint32_t), 0) < 0){
         return false;
     }
@@ -85,13 +92,14 @@ bool SocketClient::send(std::string key, std::string message){
 }
 
 int SocketClient::receive(std::string &message){
-    uint32_t length;
+    char length;
     int code;
 
     code = ::recv(mSocket, &length, sizeof(uint32_t), 0);
     if(code!=-1 && code!=0){
         length = ntohl(length);
-        char server_reply[length];
+        char* server_reply = new char[length];
+        //char server_reply[length];
         message = "";
 
         int q = length/mPacketSize;
@@ -107,11 +115,13 @@ int SocketClient::receive(std::string &message){
             }
         }
         if(r!=0){
-            char server_reply_rest[r];
+            //char server_reply_rest[r];
+            char* server_reply_rest = new char(r);
             code = ::recv(mSocket, server_reply_rest, r, 0);
             if(code!=-1 && code!=0){
                 message += std::string(server_reply_rest, r);
             }
+            delete[] server_reply_rest;
         }
     }
     return code;
@@ -125,9 +135,9 @@ void SocketClient::setDisconnectListener(void (*disconnectListener) (SocketClien
     mDisconnectListener = disconnectListener;
 }
 
-void SocketClient::setTag(void *tag, DataInterface interface){
+void SocketClient::setTag(void *tag, DataInterface data_if){
     mTag = tag;
-    mDataInterface = interface;
+    mDataInterface = data_if;
 }
 
 void* SocketClient::getTag(){

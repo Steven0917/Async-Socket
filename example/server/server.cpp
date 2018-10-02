@@ -41,7 +41,7 @@ void freeMemory(){
 }
 
 int main(){
-	DataInterface interface([](void* data){
+	DataInterface data_if([](void* data){
 		delete (std::string*) data;
 	});
 
@@ -56,7 +56,7 @@ int main(){
 				SocketClient *client = new SocketClient(sock);
 				client->addListener("message", onMessage);
 				client->setDisconnectListener(onDisconnect);
-				client->setTag(new std::string(uid), interface);
+				client->setTag(new std::string(uid), data_if);
 				client->send("uid", uid);
 				clientsVector.push_back(client);
 			}

@@ -1,8 +1,10 @@
 #ifndef DEF_SERVER
 #define DEF_SERVER
 
-#include <sys/socket.h>
-#include <arpa/inet.h>
+//#include <sys/socket.h>
+//#include <arpa/inet.h>
+
+#include <WinSock2.h>
 
 class SocketServer {
     private:
